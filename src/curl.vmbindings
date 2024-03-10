@@ -1,0 +1,16 @@
+extern get_CURLOPT_WRITEDATA
+extern curl_global_init
+extern get_CURLOPT_VERBOSE
+extern curl_easy_init
+extern curl_easy_getinfo
+extern curl_easy_cleanup
+extern curl_easy_setopt
+extern curl_global_cleanup
+extern get_CURLOPT_WRITEFUNCTION
+extern get_CURLOPT_URL
+extern memcpy
+extern curl_easy_perform
+extern get_CURL_GLOBAL_ALL
+extern get_CURLINFO_RESPONSE_CODE
+extern defn data_callback: (long, long, long, int) -> long
+extern get_CURLOPT_FOLLOWLOCATION
