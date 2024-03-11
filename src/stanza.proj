@@ -1,4 +1,3 @@
-package curl defined-in "lib-curl.stanza"
 package curl requires :
   ccfiles: "curl.c"
   ccflags:
