@@ -2,7 +2,7 @@ include? ".slm/stanza.proj"
 pkg-cache: ".slm/pkg-cache"
 packages * defined-in "src/"
 
-include "stanza-curl.proj"
+include "stanza-libcurl.proj"
 
 build main :
   inputs:
