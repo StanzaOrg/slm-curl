@@ -1,0 +1,17 @@
+include? ".slm/stanza.proj"
+pkg-cache: ".slm/pkg-cache"
+packages * defined-in "src/"
+
+include "stanza-curl.proj"
+
+build main :
+  inputs:
+    curl
+  pkg: ".slm/pkgs"
+
+build-test curl-tests :
+  inputs:
+    curl/tests
+  pkg: ".slm/test-pkgs"
+  o: "curl-tests"
+
