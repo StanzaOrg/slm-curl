@@ -3,12 +3,14 @@ name = "slm_curl"
 version = "0.0.0"
 
 [dependencies]
+slm_lang_utils_static = { git = "StanzaOrg/slm_lang_utils", version = "0.0.1" }
 
 [dependencies.libcurl]
 pkg="libcurl"
 version="8.6.0"
 type="conan"
-options.shared = "True"
+options.fPIC = "True"
+options.shared = "False"
 options.with_brotli = "False"
 options.with_c_ares = "False"
 options.with_ca_bundle = "auto"

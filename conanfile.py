@@ -70,10 +70,6 @@ class ConanSlmPackage(ConanFile):
         if "pkg" in d.keys() and "type" in d.keys() and d["type"]=="conan":
           # get its name and set any options
           pkgname = d["pkg"]
-          # set dependency shared value to match wrapper package
-          # shared value comes from conan options, not slm.toml
-          self.output.trace(f"conanfile.py: configure() options[\"{pkgname}\"].shared={self.options.shared}")
-          self.options[pkgname].shared = self.options.shared
 
           if "options" in d.keys():
             opts = d["options"]
@@ -139,21 +135,20 @@ class ConanSlmPackage(ConanFile):
     self.run("slm build", cwd=self.source_folder, scope="build")
 
     if not self.conf.get("tools.build:skip_test", default=False):
-      t="build_slm/pcre-tests"
-      self.run(f"stanza build pcre-tests -verbose -o {t}", cwd=self.source_folder, scope="build")
-      self.run(f"{t}", cwd=self.source_folder, scope="build")
+      d="build"
+      t="curl-tests"
+      self.run(f"stanza build {t} -verbose -o {d}/{t}", cwd=self.source_folder, scope="build")
+      self.run(f"{d}/{t}", cwd=self.source_folder, scope="build")
 
 
   # package(): Copies files from build folder to the package folder.
   def package(self):
     self.output.info("conanfile.py: package()")
 
-    # TODO package for .slm/deps/slm_pcre subdir
-    
     copy2(os.path.join(self.source_folder, "slm.toml"), self.package_folder)
     copy2(os.path.join(self.source_folder, "slm.lock"), self.package_folder)
     # TODO genericize
-    copy2(os.path.join(self.source_folder, "stanza-pcre-relative.proj"), os.path.join(self.package_folder, "stanza-pcre.proj"))
+    #copy2(os.path.join(self.source_folder, "stanza-curl-relative.proj"), os.path.join(self.package_folder, "stanza-curl.proj"))
     copy2(os.path.join(self.source_folder, "stanza.proj"), os.path.join(self.package_folder, "stanza.proj"))
     #copytree(os.path.join(self.source_folder, ".slm"), os.path.join(self.package_folder, ".slm"))
     copytree(os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "src"))

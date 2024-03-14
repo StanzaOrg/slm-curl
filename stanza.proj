@@ -1,8 +1,24 @@
 include? ".slm/stanza.proj"
 pkg-cache: ".slm/pkg-cache"
-packages * defined-in "src/"
 
-include "stanza-libcurl.proj"
+package curl defined-in "src/curl.stanza"
+packages curl/* defined-in "src/curl"
+
+package curl requires :
+  ccfiles: "src/curl.c"
+  ccflags:
+    ;;; TODO these [DIRS] are defined by conan and need to be resolved into this
+    ;;; file.  Currently they are not and so the system libcurl is being used
+    (
+      "-I$[CURL_INCLUDE_DIRS]"
+      "-L$[libcurl_LIB_DIRS_RELEASE]" "-lcurl"
+      "-L$[openssl_LIB_DIRS_RELEASE]" "-lssl" "-lcrypto"  ;;; ssl first, then crypto
+      "-lz"  ;;; necessary to come after deps of jitx-tests
+    )
+    on-platform :
+      windows: ("-lbcrypt" "-lcrypt32" "-lws2_32")
+      os-x: ("-Wl,-framework,SystemConfiguration" "-Wl,-framework,Security")
+      else : ()
 
 build main :
   inputs:
@@ -14,4 +30,3 @@ build-test curl-tests :
     curl/tests
   pkg: ".slm/test-pkgs"
   o: "curl-tests"
-

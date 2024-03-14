@@ -19,7 +19,7 @@ build:
 	fi
 	export CONAN_HOME="${CONAN_HOME}"  # copy from make env to bash env
 	${CONAN} config install conan-config
-	${CONAN} remote enable conancenter
+	 #${CONAN} remote enable conancenter
 	[ ! -e ".conan2/profiles/default" ] && ${CONAN} profile detect
 	(cd conan_lbstanza_generator && ${CONAN} create .)
 

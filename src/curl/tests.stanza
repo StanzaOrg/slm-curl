@@ -1,0 +1,14 @@
+
+#use-added-syntax(tests)
+defpackage curl/tests :
+  import core
+
+  import curl
+
+deftest test-init-curl :
+  val curl = Curl()
+  free(curl)
+  #EXPECT(true)
+
+deftest test-url-encode :
+  #EXPECT(url-encode("a/b") == "a%2Fb")
