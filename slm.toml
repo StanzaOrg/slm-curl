@@ -1,9 +1,9 @@
 
-name = "slm_curl"
+name = "curl"
 version = "0.0.0"
 
 [dependencies]
-slm_lang_utils_static = { git = "StanzaOrg/slm_lang_utils", version = "0.0.1" }
+lang_utils_static = { git = "StanzaOrg/slm_lang_utils", version = "0.0.1" }
 
 [dependencies.libcurl]
 pkg="libcurl"

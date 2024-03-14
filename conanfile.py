@@ -136,7 +136,7 @@ class ConanSlmPackage(ConanFile):
 
     if not self.conf.get("tools.build:skip_test", default=False):
       d="build"
-      t="curl-tests"
+      t="curl_tests"
       self.run(f"stanza build {t} -verbose -o {d}/{t}", cwd=self.source_folder, scope="build")
       self.run(f"{d}/{t}", cwd=self.source_folder, scope="build")
 

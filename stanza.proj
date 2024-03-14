@@ -25,8 +25,8 @@ build main :
     curl
   pkg: ".slm/pkgs"
 
-build-test curl-tests :
+build-test curl_tests :
   inputs:
     curl/tests
   pkg: ".slm/test-pkgs"
-  o: "curl-tests"
+  o: "curl_tests"
