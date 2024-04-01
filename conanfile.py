@@ -12,6 +12,7 @@ from conan.tools.build import can_run
 from conan.tools.files import copy
 from conan.tools.cmake import CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
+from pathlib import Path
 from shutil import copy2, copytree
 
 
@@ -52,6 +53,9 @@ class ConanSlmPackage(ConanFile):
     lock = os.path.join(self.recipe_folder, "slm.lock")
     if os.path.exists(lock):
       copy2(lock, self.export_sources_folder)
+    # copy template stanza proj files, if any
+    for f in Path(".").glob("template-stanza-*.proj"):
+        copy2(os.path.join(self.recipe_folder, f), self.export_sources_folder)
     copy2(os.path.join(self.recipe_folder, "stanza.proj"), self.export_sources_folder)
     copytree(os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
     ## generator does this? # copy(self, "stanza*.proj", os.path.join(self.recipe_folder, "build"), os.path.join(self.export_sources_folder, "build"))
@@ -132,12 +136,12 @@ class ConanSlmPackage(ConanFile):
     self.run("stanza version", cwd=self.source_folder, scope="build")
     self.run("slm version", cwd=self.source_folder, scope="build")
     self.run("[ ! -d .slm ] || slm clean", cwd=self.source_folder, scope="build")
-    self.run("slm build", cwd=self.source_folder, scope="build")
+    self.run("slm build -verbose -- -verbose", cwd=self.source_folder, scope="build")
 
     if not self.conf.get("tools.build:skip_test", default=False):
       d="build"
       t="curl_tests"
-      self.run(f"stanza build {t} -verbose -o {d}/{t}", cwd=self.source_folder, scope="build")
+      self.run(f"stanza build {t} -o {d}/{t} -verbose", cwd=self.source_folder, scope="build")
       self.run(f"{d}/{t}", cwd=self.source_folder, scope="build")
 
 
@@ -147,8 +151,7 @@ class ConanSlmPackage(ConanFile):
 
     copy2(os.path.join(self.source_folder, "slm.toml"), self.package_folder)
     copy2(os.path.join(self.source_folder, "slm.lock"), self.package_folder)
-    # TODO genericize
-    #copy2(os.path.join(self.source_folder, "stanza-curl-relative.proj"), os.path.join(self.package_folder, "stanza-curl.proj"))
+    copy2(os.path.join(self.source_folder, f"stanza-{self.name}-relative.proj"), os.path.join(self.package_folder, f"stanza-{self.name}.proj"))
     copy2(os.path.join(self.source_folder, "stanza.proj"), os.path.join(self.package_folder, "stanza.proj"))
     #copytree(os.path.join(self.source_folder, ".slm"), os.path.join(self.package_folder, ".slm"))
     copytree(os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "src"))

@@ -1,0 +1,2 @@
+package curl requires :
+  ccfiles: "src/curl.c"
