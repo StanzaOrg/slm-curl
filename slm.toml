@@ -1,6 +1,6 @@
 
 name = "curl"
-version = "0.0.9"
+version = "0.0.10"
 
 [dependencies]
 lang_utils_static = { git = "StanzaOrg/slm_lang_utils", version = "0.0.6" }
