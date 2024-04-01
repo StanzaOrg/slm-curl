@@ -68,7 +68,7 @@ class LBStanzaGenerator:
 
             # add some additional system libraries that are sometimes needed but are not in the conan recipe (?)
             # TODO: make this list dynamic or move it outside of this generator
-            extralibslnx = " \"-lz\" "
+            extralibslnx = " \"-lz\" \"-ldl\" "
             extralibsmac = " \"-lz\" \"-Wl,-framework,SystemConfiguration\" \"-Wl,-framework,Security\" "
             extralibswin = " \"-lz\" \"-lbcrypt\" \"-lcrypt32\" \"-lws2_32\" "
 
@@ -91,7 +91,7 @@ class LBStanzaGenerator:
             s = " ".join([f'"{str(p)}"' for p in complist["linux"]])
             outf.write(f'      linux: ( {startgrp} {s} {extralibslnx} {endgrp} )\n')
             s = " ".join([f'"{str(p)}"' for p in complist["macos"]])
-            outf.write(f'      os-x: ( {startgrp} {s} {extralibsmac} {endgrp} )\n')
+            outf.write(f'      os-x: ( {s} {extralibsmac} )\n')
             s = " ".join([f'"{str(p)}"' for p in complist["windows"]])
             outf.write(f'      windows: ( {startgrp} {s} {extralibswin} {endgrp} )\n')
 
@@ -115,7 +115,7 @@ class LBStanzaGenerator:
             s = " ".join([f'"{str(p)}"' for p in complist["linux"]])
             outf.write(f'      linux: ( {startgrp} {s} {extralibslnx} {endgrp} )\n')
             s = " ".join([f'"{str(p)}"' for p in complist["macos"]])
-            outf.write(f'      os-x: ( {startgrp} {s} {extralibsmac} {endgrp} )\n')
+            outf.write(f'      os-x: ( {s} {extralibsmac} )\n')
             s = " ".join([f'"{str(p)}"' for p in complist["windows"]])
             outf.write(f'      windows: ( {startgrp} {s} {extralibswin} {endgrp} )\n')
 
