@@ -68,8 +68,9 @@ class LBStanzaGenerator:
 
             # add some additional system libraries that are sometimes needed but are not in the conan recipe (?)
             # TODO: make this list dynamic or move it outside of this generator
+            # FIXME: check the "frameworks" and "system_libs" entries in the conan datastructure
             extralibslnx = " \"-lz\" \"-ldl\" "
-            extralibsmac = " \"-lz\" \"-Wl,-framework,SystemConfiguration\" \"-Wl,-framework,Security\" "
+            extralibsmac = " \"-lz\" \"-Wl,-framework,CoreFoundation\" \"-Wl,-framework,SystemConfiguration\" \"-Wl,-framework,Security\" "
             extralibswin = " \"-lz\" \"-lbcrypt\" \"-lcrypt32\" \"-lws2_32\" "
 
             # note: use '\n' for line terminator on all platforms
