@@ -1,7 +1,7 @@
 defpackage curl :
   import core
   import collections
-  import lang_utils
+  import lang-utils
 
 ;============================================================
 ;===================== Bindings =============================
