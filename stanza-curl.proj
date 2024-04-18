@@ -7,13 +7,13 @@ package curl requires :
   ccfiles: "src/curl.c"
   ccflags:
     on-platform:
-      linux: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libcrypto.a" "{.}/../openssl/lib/libssl.a"  "{.}/../zlib/lib/libz.a"  "-ldl"  "-Wl,--end-group"  )
-      os-x: (  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libcrypto.a" "{.}/../openssl/lib/libssl.a"   "{.}/../zlib/lib/libz.a" "-Wl,-framework,CoreFoundation" "-Wl,-framework,SystemConfiguration" "-Wl,-framework,Security"  )
-      windows: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libcrypto.a" "{.}/../openssl/lib/libssl.a"  "{.}/../zlib/lib/libz.a" "-lbcrypt" "-lcrypt32" "-lws2_32"   "-Wl,--end-group"  )
+      linux: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libssl.a" "{.}/../openssl/lib/libcrypto.a"  "{.}/../zlib/lib/libz.a"  "-ldl"  "-Wl,--end-group"  )
+      os-x: (  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libssl.a" "{.}/../openssl/lib/libcrypto.a"   "{.}/../zlib/lib/libz.a" "-Wl,-framework,CoreFoundation" "-Wl,-framework,SystemConfiguration" "-Wl,-framework,Security"  )
+      windows: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libssl.a" "{.}/../openssl/lib/libcrypto.a"  "{.}/../zlib/lib/libz.a" "-lbcrypt" "-lcrypt32" "-lws2_32"   "-Wl,--end-group"  )
 
 package curl/tests requires :
   ccflags:
     on-platform:
-      linux: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libcrypto.a" "{.}/../openssl/lib/libssl.a"   "{.}/../zlib/lib/libz.a"  "-ldl"  "-Wl,--end-group"  )
-      os-x: (  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libcrypto.a" "{.}/../openssl/lib/libssl.a"   "{.}/../zlib/lib/libz.a" "-Wl,-framework,CoreFoundation" "-Wl,-framework,SystemConfiguration" "-Wl,-framework,Security"  )
-      windows: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libcrypto.a" "{.}/../openssl/lib/libssl.a"   "{.}/../zlib/lib/libz.a" "-lbcrypt" "-lcrypt32" "-lws2_32"   "-Wl,--end-group"  )
+      linux: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libssl.a" "{.}/../openssl/lib/libcrypto.a"   "{.}/../zlib/lib/libz.a"  "-ldl"  "-Wl,--end-group"  )
+      os-x: (  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libssl.a" "{.}/../openssl/lib/libcrypto.a"   "{.}/../zlib/lib/libz.a" "-Wl,-framework,CoreFoundation" "-Wl,-framework,SystemConfiguration" "-Wl,-framework,Security"  )
+      windows: (  "-Wl,--start-group"  "{.}/../libcurl/lib/libcurl.a" "{.}/../openssl/lib/libssl.a" "{.}/../openssl/lib/libcrypto.a"   "{.}/../zlib/lib/libz.a" "-lbcrypt" "-lcrypt32" "-lws2_32"   "-Wl,--end-group"  )
