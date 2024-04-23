@@ -150,10 +150,16 @@ class ConanSlmPackage(ConanFile):
       if platform.system()=="Windows":
         t="test.exe"
         # on windows, find all dlls in the current directory recursively, and add their directories to the PATH so that the dlls can be loacated at runtime
-        update_path_cmd="/usr/bin/find $PWD -name \*.dll -exec dirname \"{}\" \; | /usr/bin/sort -u | xargs -d \"\n\" -I {} export PATH={}:$PATH ; "
+        # get a unique set of directories that contain dlls under the current directory
+        dll_win_dirs = {p.resolve().parents[0].as_posix() for p in sorted(Path('.').glob('**/*.dll'))}
+        # convert those windows-style paths to bash-style paths
+        dll_bash_dirs = [f"/{d[0].lower()}{d[2:]}" for d in dll_win_dirs]
+        # make a path-style string of those bash-style paths
+        path_str = ':'.join(dll_bash_dirs)
+        if path_str:
+          update_path_cmd=f"export PATH={path_str}:$PATH ; "
       self.run(f"bash -c '{update_path_cmd} {d}/{t}'",
                cwd=self.source_folder, scope="build")
-
 
   # package(): Copies files from build folder to the package folder.
   def package(self):
