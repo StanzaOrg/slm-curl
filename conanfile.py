@@ -23,7 +23,8 @@ class ConanSlmPackage(ConanFile):
   python_requires = "lbstanzagenerator_pyreq/[>=0.1]"
 
   # Binary configuration
-  settings = "os", "arch", "compiler", "build_type"
+  #settings = "os", "arch", "compiler", "build_type"
+  settings = "os", "arch"
 
   options = {"shared": [True, False], "fPIC": [True, False]}
   default_options = {"shared": True, "fPIC": True}
@@ -33,7 +34,7 @@ class ConanSlmPackage(ConanFile):
   # set_name(): Dynamically define the name of a package
   def set_name(self):
     self.output.info("conanfile.py: set_name()")
-    with open("slm.toml", "rb") as f:
+    with open(f"{self.recipe_folder}/slm.toml", "rb") as f:
         self.name = tomllib.load(f)["name"]
     self.output.info(f"conanfile.py: set_name() - self.name={self.name} from slm.toml")
 
@@ -41,31 +42,35 @@ class ConanSlmPackage(ConanFile):
   # set_version(): Dynamically define the version of a package.
   def set_version(self):
     self.output.info("conanfile.py: set_version()")
-    with open("slm.toml", "rb") as f:
+    with open(f"{self.recipe_folder}/slm.toml", "rb") as f:
         self.version = tomllib.load(f)["version"]
     self.output.info(f"conanfile.py: set_version() - self.version={self.version} from slm.toml")
 
+  # export(): Copies files that are part of the recipe
+  def export(self):
+    self.output.info("conanfile.py: export()")
+    # export slm.toml with the conan recipe so that it can be referenced at dependency time without sources
+    copy(self, "slm.toml", self.recipe_folder, self.export_folder)
 
   # export_sources(): Copies files that are part of the recipe sources
   def export_sources(self):
     self.output.info("conanfile.py: export_sources()")
     copy2(os.path.join(self.recipe_folder, "slm.toml"), self.export_sources_folder)
-    lock = os.path.join(self.recipe_folder, "slm.lock")
-    if os.path.exists(lock):
-      copy2(lock, self.export_sources_folder)
+    #lock = os.path.join(self.recipe_folder, "slm.lock")
+    #if os.path.exists(lock):
+    #  copy2(lock, self.export_sources_folder)
     # copy template stanza proj files, if any
     for f in Path(".").glob("template-stanza-*.proj"):
         copy2(os.path.join(self.recipe_folder, f), self.export_sources_folder)
     copy2(os.path.join(self.recipe_folder, "stanza.proj"), self.export_sources_folder)
     copytree(os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
-    ## generator does this? # copy(self, "stanza*.proj", os.path.join(self.recipe_folder, "build"), os.path.join(self.export_sources_folder, "build"))
 
 
   # configure(): Allows configuring settings and options while computing dependencies
   def configure(self):
     self.output.info("conanfile.py: configure()")
 
-    with open("slm.toml", "rb") as f:
+    with open(f"{self.recipe_folder}/slm.toml", "rb") as f:
       deps = tomllib.load(f)["dependencies"]
 
       # for each dependency in slm.toml
@@ -86,7 +91,7 @@ class ConanSlmPackage(ConanFile):
   def requirements(self):
     self.output.info("conanfile.py: requirements()")
 
-    with open("slm.toml", "rb") as f:
+    with open(f"{self.recipe_folder}/slm.toml", "rb") as f:
       deps = tomllib.load(f)["dependencies"]
 
       # for each dependency in slm.toml
@@ -106,9 +111,7 @@ class ConanSlmPackage(ConanFile):
   
     # use stanza provided by conan
     self.tool_requires("lbstanza/[>=0.18.58]")
-    self.tool_requires("slm/[>=0.5.5]")  # TODO FIXME 0.5.8
-    #self.test_requires("lbstanza/[>=0.18.58]")
-    #self.test_requires("slm/[>=0.5.5]")
+    self.tool_requires("slm/[>=0.6.0]")
     
     # use cmake and ninja provided by conan
     # necessary if compiling non-stanza dependencies
@@ -132,34 +135,44 @@ class ConanSlmPackage(ConanFile):
   # build(): Contains the build instructions to build a package from source
   def build(self):
     self.output.info("conanfile.py: build()")
-    self.run("pwd ; ls -la", cwd=self.source_folder, scope="build")
+    self.run("bash -c 'pwd ; ls -la'", cwd=self.source_folder, scope="build")
     self.run("stanza version", cwd=self.source_folder, scope="build")
     self.run("slm version", cwd=self.source_folder, scope="build")
-    self.run("[ ! -d .slm ] || slm clean", cwd=self.source_folder, scope="build")
+    self.run("bash -c '[ ! -d .slm ] || slm clean'", cwd=self.source_folder, scope="build")
     self.run("slm build -verbose -- -verbose", cwd=self.source_folder, scope="build")
 
     if not self.conf.get("tools.build:skip_test", default=False):
       d="build"
-      t="curl_tests"
+      t="test"
+      self.run(f"stanza clean", cwd=self.source_folder, scope="build")
       self.run(f"stanza build {t} -o {d}/{t} -verbose", cwd=self.source_folder, scope="build")
-      self.run(f"{d}/{t}", cwd=self.source_folder, scope="build")
+      update_path_cmd=""
+      if platform.system()=="Windows":
+        t="test.exe"
+        # on windows, find all dlls in the current directory recursively, and add their directories to the PATH so that the dlls can be loacated at runtime
+        update_path_cmd="/usr/bin/find $PWD -name \*.dll -exec dirname \"{}\" \; | /usr/bin/sort -u | xargs -d \"\n\" -I {} export PATH={}:$PATH ; "
+      self.run(f"bash -c '{update_path_cmd} {d}/{t}'",
+               cwd=self.source_folder, scope="build")
 
 
   # package(): Copies files from build folder to the package folder.
   def package(self):
     self.output.info("conanfile.py: package()")
+    outerlibname = self.name.removeprefix("slm-")
 
     copy2(os.path.join(self.source_folder, "slm.toml"), self.package_folder)
-    copy2(os.path.join(self.source_folder, "slm.lock"), self.package_folder)
-    copy2(os.path.join(self.source_folder, f"stanza-{self.name}-relative.proj"), os.path.join(self.package_folder, f"stanza-{self.name}.proj"))
+    #copy2(os.path.join(self.source_folder, "slm.lock"), self.package_folder)
+    copy2(os.path.join(self.source_folder, f"stanza-{outerlibname}-relative.proj"), os.path.join(self.package_folder, f"stanza-{outerlibname}.proj"))
     copy2(os.path.join(self.source_folder, "stanza.proj"), os.path.join(self.package_folder, "stanza.proj"))
-    #copytree(os.path.join(self.source_folder, ".slm"), os.path.join(self.package_folder, ".slm"))
     copytree(os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "src"))
-    
-    # copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-    # copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-    # copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-    # copy(self, pattern="*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-    # copy(self, pattern="*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-    # copy(self, pattern="*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-    # copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+
+    # copy any libraries from the build directory to /lib/
+    Path(os.path.join(self.package_folder, "lib")).mkdir(parents=True, exist_ok=True)
+    for f in Path("build").glob("*.a"):
+        copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
+    for f in Path("build").glob("*.dll"):
+        copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
+    for f in Path("build").glob("*.dylib"):
+        copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
+    for f in Path("build").glob("*.so"):
+        copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
