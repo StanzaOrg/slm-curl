@@ -1,12 +1,14 @@
 
+# this makefile uses bash commands
 SHELL := /bin/bash
-PYTHON := python
-CONAN := conan
-SED := sed
-CONAN_HOME := $(shell pwd)/.conan2
-CONAN_OPTS := -vtrace
-CONAN_BUILD_PROFILE := default
-CONAN_HOST_PROFILE := default
+# inherit these variables from the environment, with defaults if unspecified in the environment
+PYTHON ?= python
+CONAN ?= conan
+SED ?= sed
+CONAN_HOME ?= $(shell pwd)/.conan2
+CONAN_OPTS ?= -vtrace
+CONAN_BUILD_PROFILE ?= default
+CONAN_HOST_PROFILE ?= default
 # execute all lines of a target in one shell
 .ONESHELL:
 
