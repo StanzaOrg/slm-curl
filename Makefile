@@ -5,6 +5,8 @@ CONAN := conan
 SED := sed
 CONAN_HOME := $(shell pwd)/.conan2
 CONAN_OPTS := -vtrace
+CONAN_BUILD_PROFILE := default
+CONAN_HOST_PROFILE := default
 # execute all lines of a target in one shell
 .ONESHELL:
 
@@ -36,6 +38,7 @@ build:
 	 # build only the current project, not any dependencies
 	echo -e "\n*** Makefile: build: building \"$${SLMPROJNAME}/$${SLMPROJVER}\" ***"
 	${CONAN} create \
+	    -pr:b ${CONAN_BUILD_PROFILE} -pr:h ${CONAN_HOST_PROFILE} \
 	    ${CONAN_OPTS} \
 	    --build "$${SLMPROJNAME}/$${SLMPROJVER}" .
 
