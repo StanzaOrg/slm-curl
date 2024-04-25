@@ -201,7 +201,7 @@ class LBStanzaGenerator:
             self._conanfile.output.trace(f"  - dependency: {dreq.ref}")
             self._conanfile.output.trace(f"    - pref: {dinst.pref}")
             self._conanfile.output.trace(f"    - package_type: {dinst.package_type}")
-            self._conanfile.output.trace(f"    - package_path: {dinst.package_path}")
+            self._conanfile.output.trace(f"    - package_path: {dinst.package_path if dinst.package_folder else 'None'}")
 
             if not dreq.libs:
                 self._conanfile.output.trace(f"    - dep \"{dreq.ref}\" is not a lib, skipping")
