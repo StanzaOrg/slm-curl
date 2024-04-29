@@ -3,7 +3,7 @@ name = "curl"
 version = "0.1.1"
 
 [dependencies]
-lang-utils = { git = "StanzaOrg/slm-lang-utils", version = "0.1.4" }
+lang-utils = { git = "StanzaOrg/slm-lang-utils", version = "0.1.10" }
 
 [dependencies.libcurl]
 pkg="libcurl"
