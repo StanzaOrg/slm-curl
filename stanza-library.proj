@@ -1,0 +1,17 @@
+
+; These compile instructions are for binary package build time.
+; End-user slm packages will not have this include file.
+
+; compile curl.c into a shared library
+compile flag "-lstz-curl" :
+  on-platform :
+    linux :
+      "mkdir -p '{.}/lib'"
+      "cc -fPIC -rdynamic -shared -DPLATFORM_LINUX '-I{STANZA_CONFIG}/include' '{.}/src/curl.c' -o '{.}/lib/libstz-curl.so'"
+    os-x :
+      "mkdir -p '{.}/lib'"
+      "cc -fPIC -rdynamic -shared -DPLATFORM_OS_X '-I{STANZA_CONFIG}/include' '{.}/src/curl.c' -o '{.}/lib/libstz-curl.dylib'"
+    windows :
+      "mkdir {.}\\lib"
+      "gcc -Wl,--export-all-symbols -shared -DPLATFORM_WINDOWS '-I{STANZA_CONFIG}/include' '{.}/src/curl.c' -o '{.}/lib/libstz-curl.dll'"
+
