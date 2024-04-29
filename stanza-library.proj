@@ -1,0 +1,20 @@
+
+; These compile instructions are for binary package build time.
+; End-user slm packages will not have this include file.
+
+; compile curl.c into a static library
+compile flag "-lstz-curl" :
+  on-platform :
+    linux :
+      "mkdir -p '{.}/lib'"
+      "cc -fPIC -c -DPLATFORM_LINUX '-I{STANZA_CONFIG}/include' '{.}/src/curl.c' -o '{.}/lib/curl.o'"
+      "ar rcs '{.}/lib/libstz-curl.a' '{.}/lib/curl.o'"
+    os-x :
+      "mkdir -p '{.}/lib'"
+      "cc -fPIC -c -DPLATFORM_OS_X '-I{STANZA_CONFIG}/include' '{.}/src/curl.c' -c -o '{.}/lib/curl.o'"
+      "ar rcs '{.}/lib/libstz-curl.a' '{.}/lib/curl.o'"
+    windows :
+      "mkdir {.}\\lib"
+      "gcc -c -DPLATFORM_WINDOWS '-I{STANZA_CONFIG}\\include' '{.}\\src\\curl.c' -o '{.}\\lib\\curl.o'"
+      "ar rcs '{.}\\lib\\libstz-curl.a' '{.}\\lib\\curl.o'"
+
