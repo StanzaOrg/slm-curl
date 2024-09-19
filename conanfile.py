@@ -20,14 +20,14 @@ required_conan_version = ">=2.0"
 
 class ConanSlmPackage(ConanFile):
   package_type = "library"
-  python_requires = "lbstanzagenerator_pyreq/[>=0.1]"
+  python_requires = "lbstanzagenerator_pyreq/[>=0.6.15 <0.7.0]"
 
   # Binary configuration
   #settings = "os", "arch", "compiler", "build_type"
   settings = "os", "arch"
 
   options = {"shared": [True, False], "fPIC": [True, False]}
-  default_options = {"shared": True, "fPIC": True}
+  default_options = {"shared": False, "fPIC": True, "*/*:shared": False}
   implements = ["auto_shared_fpic"]
 
 
@@ -63,6 +63,8 @@ class ConanSlmPackage(ConanFile):
     for f in Path(".").glob("template-stanza-*.proj"):
         copy2(os.path.join(self.recipe_folder, f), self.export_sources_folder)
     copy2(os.path.join(self.recipe_folder, "stanza.proj"), self.export_sources_folder)
+    for f in Path(".").glob("stanza-library.proj"):
+        copy2(os.path.join(self.recipe_folder, f), self.export_sources_folder)
     copytree(os.path.join(self.recipe_folder, "src"), os.path.join(self.export_sources_folder, "src"))
 
 
@@ -122,7 +124,7 @@ class ConanSlmPackage(ConanFile):
   
     # use stanza provided by conan
     self.tool_requires("lbstanza/[>=0.18.58]")
-    self.tool_requires("slm/[>=0.6.0]")
+    self.tool_requires("slm/[>=0.6.7]")
     
     # use cmake and ninja provided by conan
     # necessary if compiling non-stanza dependencies
@@ -150,6 +152,7 @@ class ConanSlmPackage(ConanFile):
     self.run("stanza version", cwd=self.source_folder, scope="build")
     self.run("slm version", cwd=self.source_folder, scope="build")
     self.run("bash -c '[ ! -d .slm ] || slm clean'", cwd=self.source_folder, scope="build")
+    Path(os.path.join(self.source_folder, "build")).mkdir(parents=True, exist_ok=True)
     self.run("slm build -verbose -- -verbose", cwd=self.source_folder, scope="build")
 
     if not self.conf.get("tools.build:skip_test", default=False):
@@ -158,9 +161,16 @@ class ConanSlmPackage(ConanFile):
       self.run(f"stanza clean", cwd=self.source_folder, scope="build")
       self.run(f"stanza build {t} -o {d}/{t} -verbose", cwd=self.source_folder, scope="build")
       update_path_cmd=""
-      if platform.system()=="Windows":
+      if platform.system()=="Darwin":
+        # on macos, find all dlls in the current directory recursively, and add their directories to the DYLD_LIBRARY_PATH so that the dlls can be located at runtime
+        # get a unique set of directories that contain dlls under the current directory
+        dylib_dirs = {p.resolve().parents[0].as_posix() for p in sorted(Path('.').glob('**/*.dylib'))}
+        path_str = ':'.join(dylib_dirs)
+        if path_str:
+          update_path_cmd=f"export DYLD_LIBRARY_PATH={path_str}:$DYLD_LIBRARY_PATH ; "
+      elif platform.system()=="Windows":
         t="test.exe"
-        # on windows, find all dlls in the current directory recursively, and add their directories to the PATH so that the dlls can be loacated at runtime
+        # on windows, find all dlls in the current directory recursively, and add their directories to the PATH so that the dlls can be located at runtime
         # get a unique set of directories that contain dlls under the current directory
         dll_win_dirs = {p.resolve().parents[0].as_posix() for p in sorted(Path('.').glob('**/*.dll'))}
         # convert those windows-style paths to bash-style paths
@@ -183,13 +193,22 @@ class ConanSlmPackage(ConanFile):
     copy2(os.path.join(self.source_folder, "stanza.proj"), os.path.join(self.package_folder, "stanza.proj"))
     copytree(os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "src"))
 
-    # copy any libraries from the build directory to /lib/
+    # copy executable matching the library name (if any) from the build directory to /bin/
+    exe=os.path.join(self.source_folder, outerlibname)
+    if platform.system()=="Windows":
+        exe += ".exe"
+    if os.path.exists(exe):
+        pkgbindir = os.path.join(self.package_folder, "bin")
+        Path(pkgbindir).mkdir(parents=True, exist_ok=True)
+        copy2(exe, pkgbindir)
+
+    # copy any libraries from the lib build directory to /lib/
     Path(os.path.join(self.package_folder, "lib")).mkdir(parents=True, exist_ok=True)
-    for f in Path("build").glob("*.a"):
+    for f in Path("lib").glob("*.a"):
         copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
-    for f in Path("build").glob("*.dll"):
+    for f in Path("lib").glob("*.dll"):
         copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
-    for f in Path("build").glob("*.dylib"):
+    for f in Path("lib").glob("*.dylib"):
         copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
-    for f in Path("build").glob("*.so"):
+    for f in Path("lib").glob("*.so"):
         copy2(os.path.join(self.source_folder, f), os.path.join(self.package_folder, "lib"))
