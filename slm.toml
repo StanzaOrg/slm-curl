@@ -3,7 +3,14 @@ name = "curl"
 version = "0.0.20"
 
 [dependencies]
-lang-utils-static = { git = "StanzaOrg/slm-lang-utils", version = "0.0.13" }
+
+[dependencies.lang-utils]
+pkg="lang-utils"
+version="0.0.16"
+type="conan"
+options.shared = "False"
+options.linux.fPIC = "True"
+options.macos.fPIC = "True"
 
 [dependencies.libcurl]
 pkg="libcurl"
