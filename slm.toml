@@ -14,7 +14,7 @@ options.macos.fPIC = "True"
 
 [dependencies.libcurl]
 pkg="libcurl"
-version="8.6.0"
+version="8.10.1"
 type="conan"
 options.shared = "True"
 options.with_brotli = "False"
