@@ -1,6 +1,6 @@
 
 name = "curl"
-version = "0.1.21"
+version = "0.1.22"
 
 [dependencies]
 
@@ -39,6 +39,7 @@ options.with_libidn = "False"
 options.with_libpsl = "False"
 options.with_librtmp = "False"
 options.with_libssh2 = "False"
+options.with_misc_docs= "False"
 options.with_mqtt = "True"
 options.with_nghttp2 = "False"
 options.with_ntlm = "True"
